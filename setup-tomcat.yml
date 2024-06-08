@@ -1,0 +1,37 @@
+---
+- name: This is test playbook
+  hosts: all
+  become: yes
+  tasks:
+  - name: install java in RedHat
+    yum:
+      name: java
+      state: present
+    when: ansible_os_family == "RedHat"
+
+  - name: install java in ubuntu
+    apt:
+      name: default-jdk
+      state: present
+    when: ansible_os_family == "Debian"
+
+  - name: download tomcat package
+    get_url:
+      url: https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.100/bin/apache-tomcat-8.5.100.tar.gz
+      dest: /opt
+
+  - name: untar tomcat package
+    unarchive:
+      src: /opt/apache-tomcat-8.5.100.tar.gz
+      dest: /opt
+      remote_src: yes
+
+  - name: add execution permission to startup.sh
+    file:
+      path: /opt/apache-tomcat-8.5.100/bin/startup.sh
+      mode: 0777
+
+  - name: start tomcat service
+    shell: nohup ./startup.sh
+    args:
+      chdir: /opt/apache-tomcat-8.5.100/bin
